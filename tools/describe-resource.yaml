@@ -1,0 +1,71 @@
+identity:
+  name: 'describe-resource'
+  author: 'lework'
+  label:
+    en_US: 'Describe Resource'
+    zh_Hans: '获取资源信息'
+    pt_BR: 'Descrever Recurso'
+description:
+  human:
+    en_US: 'Get Kubernetes resource information, similar to kubectl describe command'
+    zh_Hans: '获取 Kubernetes 资源信息，类似 kubectl describe 命令'
+    pt_BR: 'Obter informações de recursos do Kubernetes, semelhante ao comando kubectl describe'
+  llm: 'Tool for getting Kubernetes resource information, similar to kubectl describe command. Useful for inspecting and troubleshooting resources in a Kubernetes cluster.'
+parameters:
+  - name: resource_type
+    type: string
+    required: true
+    label:
+      en_US: 'Resource Type'
+      zh_Hans: '资源类型'
+      pt_BR: 'Tipo de Recurso'
+    human_description:
+      en_US: 'The type of resource to describe (e.g. pod, deployment, service, daemonset, statefulset, ingress, configmap, secret, job, cronjob, node, namespace, pv, pvc)'
+      zh_Hans: '获取资源的类型（如pod、deployment、service，daemonset，statefulset，ingress，configmap，secret，job，cronjob，node，namespace，pv，pvc）'
+      pt_BR: 'Tipo de recurso para descrever (ex: pod, deployment, service, daemonset, statefulset, ingress, configmap, secret, job, cronjob, node, namespace, pv, pvc)'
+    llm_description: 'The type of resource to describe (pod, deployment, daemonset, statefulset, service, ingress, configmap, secret, job, cronjob, node, namespace, pv, pvc)'
+    form: llm
+  - name: resource_name
+    type: string
+    required: true
+    label:
+      en_US: 'Resource Name'
+      zh_Hans: '资源名称'
+      pt_BR: 'Nome do Recurso'
+    human_description:
+      en_US: 'The name of the resource to describe'
+      zh_Hans: '要描述的资源名称'
+      pt_BR: 'Nome do recurso para descrever'
+    llm_description: 'The name of the resource to describe'
+    form: llm
+  - name: namespace
+    type: string
+    required: false
+    default: 'default'
+    label:
+      en_US: 'Namespace'
+      zh_Hans: '命名空间'
+      pt_BR: 'Namespace'
+    human_description:
+      en_US: 'The namespace where the resource is located (default: default, not required for cluster-level resources like nodes, pvs, namespaces)'
+      zh_Hans: '资源所在的命名空间（默认：default，对于node、namespace、pv等集群级别资源可不填）'
+      pt_BR: 'O namespace onde o recurso está localizado (padrão: default, não necessário para recursos de nível de cluster como nodes, pvs, namespaces)'
+    llm_description: 'The namespace where the resource is located (default: default)'
+    form: llm
+  - name: kubeconfig
+    type: secret-input
+    required: false
+    label:
+      en_US: 'Kubeconfig'
+      zh_Hans: 'Kubeconfig'
+      pt_BR: 'Kubeconfig'
+    human_description:
+      en_US: 'The kubeconfig to use for the Kubernetes cluster, need to be converted to base64 format (optional, if omitted will use the default kubeconfig)'
+      zh_Hans: '用于Kubernetes集群的kubeconfig, 需要转成 base64 格式 （可选，如果省略将使用默认的kubeconfig）'
+      pt_BR: 'O kubeconfig para usar para o cluster Kubernetes, precisa ser convertido para base64 (opcional, se omitido, o kubeconfig padrão será usado)'
+    llm_description: 'The kubeconfig to use for the Kubernetes cluster, need to be converted to base64 format (optional)'
+    form: llm
+extra:
+  python:
+    source: tools/describe-resource.py
+    class_name: 'DescribeResourceTool'

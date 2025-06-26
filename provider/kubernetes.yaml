@@ -1,0 +1,33 @@
+identity:
+  author: 'lework'
+  name: 'kubernetes'
+  label:
+    en_US: 'Kubernetes'
+    zh_Hans: 'Kubernetes'
+    pt_BR: 'Kubernetes'
+  description:
+    en_US: 'Get Kubernetes cluster resource information'
+    zh_Hans: '获取Kubernetes集群资源信息'
+    pt_BR: 'Obter informações de recursos do cluster Kubernetes'
+  icon: 'icon.svg'
+credentials_for_provider: #添加 credentials_for_provider 字段
+  kubeconfig:
+    type: secret-input
+    required: true
+    label:
+      en_US: Kubeconfig
+      zh_Hans: Kubeconfig
+    placeholder:
+      en_US: Please input your kubeconfig, need to be converted to base64 format.
+      zh_Hans: 请输入您的 kubeconfig, 需要转成 base64 格式。
+    help:
+      en_US: Get your kubeconfig from Kubernetes cluster, need to be converted to base64 format.
+      zh_Hans: 从Kubernetes集群获取您的kubeconfig, 需要转成 base64 格式。
+    url: https://kubernetes.io/docs/reference/config-api/kubeconfig-file/
+tools:
+  - tools/get-pod-logs.yaml
+  - tools/describe-resource.yaml
+  - tools/list-resources.yaml
+extra:
+  python:
+    source: provider/kubernetes.py

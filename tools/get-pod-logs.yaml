@@ -1,0 +1,99 @@
+identity:
+  name: 'get-pod-logs'
+  author: 'lework'
+  label:
+    en_US: 'Get Pod Logs'
+    zh_Hans: '获取Pod日志'
+    pt_BR: 'Obter Logs do Pod'
+description:
+  human:
+    en_US: 'Get logs from a pod in the Kubernetes cluster'
+    zh_Hans: '获取Kubernetes集群中Pod的日志'
+    pt_BR: 'Obter logs de um pod no cluster Kubernetes'
+  llm: 'Tool for getting logs from a specific pod in the Kubernetes cluster. Useful for debugging and monitoring applications running in Kubernetes.'
+parameters:
+  - name: pod_name
+    type: string
+    required: true
+    label:
+      en_US: 'Pod Name'
+      zh_Hans: 'Pod名称'
+      pt_BR: 'Nome do Pod'
+    human_description:
+      en_US: 'The name of the pod to get logs from'
+      zh_Hans: '要获取日志的Pod名称'
+      pt_BR: 'Nome do pod para obter logs'
+    llm_description: 'The name of the pod to get logs from'
+    form: llm
+  - name: namespace
+    type: string
+    required: false
+    default: 'default'
+    label:
+      en_US: 'Namespace'
+      zh_Hans: '命名空间'
+      pt_BR: 'Namespace'
+    human_description:
+      en_US: 'The namespace where the pod is located (default: default)'
+      zh_Hans: 'Pod所在的命名空间（默认：default）'
+      pt_BR: 'O namespace onde o pod está localizado (padrão: default)'
+    llm_description: 'The namespace where the pod is located (default: default)'
+    form: llm
+  - name: container_name
+    type: string
+    required: false
+    label:
+      en_US: 'Container Name'
+      zh_Hans: '容器名称'
+      pt_BR: 'Nome do Container'
+    human_description:
+      en_US: 'The name of the container in the pod to get logs from (optional, if omitted logs from the first container will be returned)'
+      zh_Hans: '要获取日志的Pod中的容器名称（可选，如果省略将返回第一个容器的日志）'
+      pt_BR: 'Nome do contêiner no pod para obter logs (opcional, se omitido, os logs do primeiro contêiner serão retornados)'
+    llm_description: 'The name of the container in the pod to get logs from (optional)'
+    form: llm
+  - name: tail_lines
+    type: number
+    required: false
+    default: 20
+    label:
+      en_US: 'Tail Lines'
+      zh_Hans: '日志行数'
+      pt_BR: 'Número de Linhas'
+    human_description:
+      en_US: 'The number of lines to return from the end of the logs (default: 20)'
+      zh_Hans: '从日志末尾返回的行数（默认：20）'
+      pt_BR: 'O número de linhas para retornar do final dos logs (padrão: 20)'
+    llm_description: 'The number of lines to return from the end of the logs (default: 20)'
+    form: llm
+  - name: previous_logs
+    type: boolean
+    required: false
+    default: false
+    label:
+      en_US: 'Previous Logs'
+      zh_Hans: '是否返回之前的日志'
+      pt_BR: 'Logs Anteriores'
+    human_description:
+      en_US: 'Whether to return previous logs (default: false)'
+      zh_Hans: '是否返回之前的日志（默认：false）'
+      pt_BR: 'Se deve retornar logs anteriores (padrão: false)'
+    llm_description: 'Whether to return previous logs (default: false)'
+    form: llm
+  - name: kubeconfig
+    type: secret-input
+    required: false
+    label:
+      en_US: 'Kubeconfig'
+      zh_Hans: 'Kubeconfig'
+      pt_BR: 'Kubeconfig'
+    human_description:
+      en_US: 'The kubeconfig to use for the Kubernetes cluster, need to be converted to base64 format (optional, if omitted will use the default kubeconfig)'
+      zh_Hans: '用于Kubernetes集群的kubeconfig, 需要转成 base64 格式 （可选，如果省略将使用默认的kubeconfig）'
+      pt_BR: 'O kubeconfig para usar para o cluster Kubernetes, precisa ser convertido para base64 (opcional, se omitido, o kubeconfig padrão será usado)'
+    llm_description: 'The kubeconfig to use for the Kubernetes cluster, need to be converted to base64 format (optional)'
+    form: llm
+extra:
+  python:
+    source: tools/get-pod-logs.py
+    class_name: 'GetPodLogsTool'

@@ -1,0 +1,121 @@
+identity:
+  name: 'list-resources'
+  author: 'lework'
+  label:
+    en_US: 'List Resources'
+    zh_Hans: '获取资源列表'
+    pt_BR: 'Listar Recursos'
+description:
+  human:
+    en_US: 'Get resource list from the Kubernetes cluster'
+    zh_Hans: '获取Kubernetes集群中各类资源的列表'
+    pt_BR: 'Obter lista de recursos do cluster Kubernetes'
+  llm: 'Tool for listing various types of resources in a Kubernetes cluster. Useful for getting an overview of resources, filtering by namespace, labels, or fields.'
+parameters:
+  - name: resource_type
+    type: string
+    required: true
+    label:
+      en_US: 'Resource Type'
+      zh_Hans: '资源类型'
+      pt_BR: 'Tipo de Recurso'
+    human_description:
+      en_US: 'The type of resource to list (e.g., pod, deployment, service, daemonset, statefulset, ingress, configmap, secret, job, cronjob, node, namespace, pv, pvc)'
+      zh_Hans: '要查询的资源类型 (例如 pod, deployment, service, daemonset, statefulset, ingress, configmap, secret, job, cronjob, node, namespace, pv, pvc)'
+      pt_BR: 'O tipo de recurso para listar (ex., pod, deployment, service, daemonset, statefulset, ingress, configmap, secret, job, cronjob, node, namespace, pv, pvc)'
+    llm_description: |
+      要查询的资源类型，支持以下资源类型：
+      - pod/pods：Pod资源
+      - deployment/deployments：Deployment资源
+      - service/services/svc：Service资源
+      - node/nodes：Node资源
+      - namespace/namespaces/ns：Namespace资源
+      - configmap/configmaps/cm：ConfigMap资源
+      - secret/secrets：Secret资源
+      - ingress/ingresses/ing：Ingress资源
+      - daemonset/daemonsets/ds：DaemonSet资源
+      - statefulset/statefulsets/sts：StatefulSet资源
+      - job/jobs：Job资源
+      - cronjob/cronjobs/cj：CronJob资源
+      - persistentvolume/persistentvolumes/pv：PersistentVolume资源
+      - persistentvolumeclaim/persistentvolumeclaims/pvc：PersistentVolumeClaim资源
+    form: llm
+  - name: namespace
+    type: string
+    required: false
+    label:
+      en_US: 'Namespace'
+      zh_Hans: '命名空间'
+      pt_BR: 'Namespace'
+    human_description:
+      en_US: 'The namespace to list resources from (empty for all namespaces)'
+      zh_Hans: '要查询的命名空间 (留空则查询所有命名空间)'
+      pt_BR: 'O namespace para listar recursos (vazio para todos os namespaces)'
+    llm_description: |
+      指定的命名空间，如果不指定则获取所有命名空间下的资源。
+      注意：对于node、persistentvolume和namespace等集群级资源，此参数将被忽略。
+    form: llm
+  - name: label_selector
+    type: string
+    required: false
+    label:
+      en_US: 'Label Selector'
+      zh_Hans: '标签选择器'
+      pt_BR: 'Seletor de Etiquetas'
+    human_description:
+      en_US: 'Filter resources by label selectors (format: key1=value1,key2=value2)'
+      zh_Hans: '通过标签选择器过滤资源 (格式: key1=value1,key2=value2)'
+      pt_BR: 'Filtrar recursos por seletores de etiquetas (formato: key1=value1,key2=value2)'
+    llm_description: |
+      标签选择器，用于按标签过滤资源。
+      格式为"key1=value1,key2=value2"，多个标签之间使用逗号分隔。
+    form: llm
+  - name: field_selector
+    type: string
+    required: false
+    label:
+      en_US: 'Field Selector'
+      zh_Hans: '字段选择器'
+      pt_BR: 'Seletor de Campos'
+    human_description:
+      en_US: 'Filter resources by field selectors (format: key1=value1,key2=value2)'
+      zh_Hans: '通过字段选择器过滤资源 (格式: key1=value1,key2=value2)'
+      pt_BR: 'Filtrar recursos por seletores de campos (formato: key1=value1,key2=value2)'
+    llm_description: |
+      字段选择器，用于按字段过滤资源。
+      格式为"key1=value1,key2=value2"，多个字段之间使用逗号分隔。
+    form: llm
+  - name: limit
+    type: number
+    required: false
+    default: 10
+    label:
+      en_US: 'Result Limit'
+      zh_Hans: '结果数量限制'
+      pt_BR: 'Limite de Resultados'
+    human_description:
+      en_US: 'Maximum number of results to return (default: 10)'
+      zh_Hans: '返回结果的最大数量 (默认: 10)'
+      pt_BR: 'Número máximo de resultados para retornar (padrão: 10)'
+    llm_description: |
+      返回结果的最大数量。默认为10, 如果设置为0, 则不限制。
+    form: llm
+  - name: kubeconfig
+    type: secret-input
+    required: false
+    label:
+      en_US: 'Kubeconfig'
+      zh_Hans: 'Kubeconfig'
+      pt_BR: 'Kubeconfig'
+    human_description:
+      en_US: 'The kubeconfig to use for the Kubernetes cluster, need to be converted to base64 format (optional)'
+      zh_Hans: '用于Kubernetes集群的kubeconfig, 需要转成 base64 格式 (可选)'
+      pt_BR: 'O kubeconfig para usar para o cluster Kubernetes, precisa ser convertido para base64 (opcional)'
+    llm_description: |
+      Kubernetes配置文件的内容（Base64编码）。
+      如果不提供，将使用插件凭据中配置的kubeconfig。
+    form: llm
+extra:
+  python:
+    source: tools/list_resources.py
+    class_name: 'ListResourcesTool'
