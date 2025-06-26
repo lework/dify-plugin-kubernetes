@@ -23,7 +23,7 @@ class ListResourcesTool(Tool):
             
             # 验证资源类型
             if not resource_type:
-                raise InvokeServerUnavailableError("未配置资源类型")
+                raise InvokeServerUnavailableError("resource_type is required")
             
             # 如果提供了limit，确保它是一个有效的整数
             try:
@@ -259,11 +259,11 @@ class ListResourcesTool(Tool):
                     resources = self._extract_pvc_list(api_response.items)
                 
                 else:
-                    raise InvokeServerUnavailableError(f"不支持的资源类型: {resource_type}")
+                    raise InvokeServerUnavailableError(f"unsupported resource type: {resource_type}")
                     
             except ApiException as e:
                 if e.status == 404:
-                    yield self.create_text_message(f"未找到资源: {resource_type}")
+                    yield self.create_text_message(f"resource {resource_type} not found")
                     yield self.create_json_message({
                         "resource_type": resource_type,
                         "resources": [],
@@ -272,7 +272,7 @@ class ListResourcesTool(Tool):
                     return
                 else:
                     # 其他API错误
-                    raise InvokeServerUnavailableError(f"获取资源列表失败: {str(e)}")
+                    raise InvokeServerUnavailableError(f"failed to list resources: {str(e)}")
             
             # 构建响应
             response = {
@@ -291,7 +291,7 @@ class ListResourcesTool(Tool):
             
         except Exception as e:
             traceback.print_exc()
-            raise InvokeServerUnavailableError(f"获取资源列表失败: {str(e)}")
+            raise InvokeServerUnavailableError(f"failed to list resources: {str(e)}")
     
     def _extract_pod_list(self, pods):
         """提取Pod列表信息"""
@@ -548,7 +548,7 @@ class ListResourcesTool(Tool):
                 "namespace": pvc.metadata.namespace,
                 "status": pvc.status.phase,
                 "volume": pvc.spec.volume_name,
-                "capacity": pvc.status.capacity.get("storage") if hasattr(pvc.status, "capacity") else "未绑定",
+                "capacity": pvc.status.capacity.get("storage") if hasattr(pvc.status, "capacity") else "unbound",
                 "access_modes": pvc.spec.access_modes,
                 "storage_class": pvc.spec.storage_class_name,
                 "age": pvc.metadata.creation_timestamp
@@ -558,47 +558,47 @@ class ListResourcesTool(Tool):
     def _format_resource_list(self, resource_type, resources, namespace=None):
         """格式化资源列表为可读文本"""
         if not resources:
-            return f"未找到{resource_type}资源" + (f" (命名空间: {namespace})" if namespace else "")
+            return f"resource {resource_type} not found" + (f" (namespace: {namespace})" if namespace else "")
         
         lines = []
         # 添加标题行
         if namespace:
-            lines.append(f"{resource_type}资源列表 (命名空间: {namespace})")
+            lines.append(f"{resource_type} resources (namespace: {namespace})")
         else:
-            lines.append(f"{resource_type}资源列表 (所有命名空间)")
+            lines.append(f"{resource_type} resources (all namespaces)")
         
         # 根据资源类型设置表格头部
         headers = []
         if resource_type in ["pod", "pods"]:
             if not namespace:
-                headers = ["名称", "命名空间", "状态", "IP地址", "节点", "就绪", "重启次数", "创建时间"]
+                headers = ["name", "namespace", "status", "ip", "node", "ready", "restarts", "age"]
             else:
-                headers = ["名称", "状态", "IP地址", "节点", "就绪", "重启次数", "创建时间"]
+                headers = ["name", "status", "ip", "node", "ready", "restarts", "age"]
         
         elif resource_type in ["deployment", "deployments"]:
             if not namespace:
-                headers = ["名称", "命名空间", "副本", "可用", "创建时间"]
+                headers = ["name", "namespace", "replicas", "available", "age"]
             else:
-                headers = ["名称", "副本", "可用", "创建时间"]
+                headers = ["name", "replicas", "available", "age"]
         
         elif resource_type in ["service", "services", "svc"]:
             if not namespace:
-                headers = ["名称", "命名空间", "类型", "集群IP", "外部IP", "端口", "创建时间"]
+                headers = ["name", "namespace", "type", "cluster_ip", "external_ips", "ports", "age"]
             else:
-                headers = ["名称", "类型", "集群IP", "外部IP", "端口", "创建时间"]
+                headers = ["name", "type", "cluster_ip", "external_ips", "ports", "age"]
         
         elif resource_type in ["node", "nodes"]:
-            headers = ["名称", "状态", "角色", "版本", "内部IP", "CPU", "内存", "创建时间"]
+            headers = ["name", "status", "roles", "version", "internal_ip", "cpu", "memory", "age"]
         
         elif resource_type in ["namespace", "namespaces", "ns"]:
-            headers = ["名称", "状态", "创建时间"]
+            headers = ["name", "status", "age"]
         
         else:
             # 通用表头
             if resource_type not in ["node", "nodes", "namespace", "namespaces", "ns", "persistentvolume", "persistentvolumes", "pv"]:
-                headers = ["名称", "命名空间", "创建时间"]
+                headers = ["name", "namespace", "age"]
             else:
-                headers = ["名称", "创建时间"]
+                headers = ["name", "age"]
         
         # 添加表格头部
         lines.append(" | ".join(headers))
@@ -613,8 +613,8 @@ class ListResourcesTool(Tool):
                 if not namespace:
                     row.append(resource["namespace"])
                 row.append(resource["status"])
-                row.append(resource["ip"] or "无")
-                row.append(resource["node"] or "无")
+                row.append(resource["ip"] or "unknown")
+                row.append(resource["node"] or "unknown")
                 row.append(f"{resource['ready_containers']}/{resource['containers']}")
                 row.append(str(resource["restarts"]))
                 row.append(self._format_timestamp(resource["age"]))
@@ -633,16 +633,16 @@ class ListResourcesTool(Tool):
                     row.append(resource["namespace"])
                 row.append(resource["type"])
                 row.append(resource["cluster_ip"] or "None")
-                row.append(", ".join(resource["external_ips"]) or "无")
-                row.append(", ".join(resource["ports"]) or "无")
+                row.append(", ".join(resource["external_ips"]) or "unknown")
+                row.append(", ".join(resource["ports"]) or "unknown")
                 row.append(self._format_timestamp(resource["age"]))
             
             elif resource_type in ["node", "nodes"]:
                 row.append(resource["name"])
                 row.append(resource["status"])
-                row.append(", ".join(resource["roles"]) or "无")
+                row.append(", ".join(resource["roles"]) or "unknown")
                 row.append(resource["version"])
-                row.append(resource["internal_ip"] or "无")
+                row.append(resource["internal_ip"] or "unknown")
                 row.append(resource["capacity"]["cpu"])
                 row.append(resource["capacity"]["memory"])
                 row.append(self._format_timestamp(resource["age"]))
@@ -662,14 +662,14 @@ class ListResourcesTool(Tool):
             
             lines.append(" | ".join(row))
         
-        lines.append(f"\n资源总数: {len(resources)}")
+        lines.append(f"\ntotal resources: {len(resources)}")
         return "\n".join(lines)
 
     def _format_timestamp(self, timestamp):
         """格式化时间戳为人类可读格式"""
         import datetime
         if not timestamp:
-            return "未知"
+            return "unknown"
         
         if isinstance(timestamp, str):
             try:

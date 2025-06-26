@@ -22,9 +22,9 @@ class DescribeResourceTool(Tool):
 
             # 验证必要参数
             if not resource_type:
-                raise InvokeServerUnavailableError("未配置资源类型")
+                raise InvokeServerUnavailableError("resource_type is required")
             if not resource_name:
-                raise InvokeServerUnavailableError("未配置资源名称")
+                raise InvokeServerUnavailableError("resource_name is required")
 
             # 加载Kubernetes配置
             if kubeconfig:
@@ -154,7 +154,7 @@ class DescribeResourceTool(Tool):
                     # 获取PVC相关的事件
                     resource_info["events"] = self._get_resource_events(core_v1, namespace, "PersistentVolumeClaim", resource_name)
                 else:
-                    raise InvokeServerUnavailableError(f"不支持的资源类型: {resource_type}")
+                    raise InvokeServerUnavailableError(f"unsupported resource type: {resource_type}")
             except ApiException as e:
                 if e.status == 404:
                     # 资源不存在，返回空数据
@@ -163,20 +163,20 @@ class DescribeResourceTool(Tool):
                         "resource_name": resource_name,
                         "namespace": namespace if resource_type not in ["node", "pv", "namespace", "ns"] else "",
                         "status": "NotFound",
-                        "message": f"资源 {resource_name} 不存在"
+                        "message": f"resource {resource_name} not found"
                     }
                     
                     # 输出text
-                    message = f"未找到资源: {resource_type}/{resource_name}"
+                    message = f"resource {resource_type}/{resource_name} not found"
                     if resource_type not in ["node", "pv", "namespace", "ns"]:
-                        message += f" (命名空间: {namespace})"
+                        message += f" (namespace: {namespace})"
                     
                     yield self.create_text_message(message)
                     yield self.create_json_message(resource_info)
                     return
                 else:
                     # 其他API错误
-                    raise InvokeServerUnavailableError(f"获取资源信息失败: {str(e)}")
+                    raise InvokeServerUnavailableError(f"failed to get resource information: {str(e)}")
 
             # 格式化输出文本
             text_message = self._format_resource_info(resource_type, resource_name, namespace, resource_info)
@@ -193,7 +193,7 @@ class DescribeResourceTool(Tool):
             
         except Exception as e:
             traceback.print_exc()
-            raise InvokeServerUnavailableError(f"获取资源信息失败: {str(e)}")
+            raise InvokeServerUnavailableError(f"failed to get resource information: {str(e)}")
 
     def _get_resource_events(self, api, namespace, kind, name):
         """获取资源相关的事件"""
@@ -215,7 +215,7 @@ class DescribeResourceTool(Tool):
                     "count": event.count,
                     "first_timestamp": event.first_timestamp,
                     "last_timestamp": event.last_timestamp,
-                    "source": f"{event.source.component or '未知'}{f'/{event.source.host}' if event.source.host else ''}",
+                    "source": f"{event.source.component or 'unknown'}{f'/{event.source.host}' if event.source.host else ''}",
                 }
                 event_list.append(event_info)
             

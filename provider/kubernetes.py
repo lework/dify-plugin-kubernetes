@@ -1,15 +1,10 @@
 from typing import Any
-import tempfile
-import os
 import yaml
 import base64
 
 from dify_plugin import ToolProvider
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 from kubernetes import client, config
-
-# 导入Tool类
-from tools.list_resources import ListResourcesTool
 
 
 class DifyPluginKubernetesProvider(ToolProvider):
@@ -19,7 +14,7 @@ class DifyPluginKubernetesProvider(ToolProvider):
             required_fields = ['kubeconfig']
             for field in required_fields:
                 if field not in credentials or not credentials[field]:
-                    raise ValueError(f"缺少必要的凭证字段: {field}")
+                    raise ValueError(f"missing required credential field: {field}")
             
             # 获取kubeconfig字符串
             kubeconfig_str = credentials['kubeconfig']
@@ -34,16 +29,16 @@ class DifyPluginKubernetesProvider(ToolProvider):
                 kubeconfig_str = base64.b64decode(kubeconfig_str).decode('utf-8')
             
                 if not kubeconfig_str:
-                    raise ValueError("kubeconfig不能为空")
+                    raise ValueError("kubeconfig is empty")
             
                 kubeconfig_dict = yaml.safe_load(kubeconfig_str)
                 config.load_kube_config_from_dict(kubeconfig_dict)
             except Exception as yaml_error:
-                raise ValueError(f"无法解析kubeconfig: {str(yaml_error)}")
+                raise ValueError(f"failed to parse kubeconfig: {str(yaml_error)}")
             
             # 尝试获取API版本，验证连接是否正常
             v1 = client.CoreV1Api()
             v1.get_api_resources()
             
         except Exception as e:
-            raise ToolProviderCredentialValidationError(f"无法连接到Kubernetes集群: {str(e)}")
+            raise ToolProviderCredentialValidationError(f"failed to connect to Kubernetes cluster: {str(e)}")

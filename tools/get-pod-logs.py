@@ -23,7 +23,7 @@ class GetPodLogsTool(Tool):
             previous_logs = tool_parameters.get("previous_logs", False)
 
             if not pod_name:
-                raise InvokeServerUnavailableError("未配置Pod名称")
+                raise InvokeServerUnavailableError("pod_name is required")
 
             if kubeconfig:
                 missing_padding = len(kubeconfig) % 4
@@ -66,7 +66,7 @@ class GetPodLogsTool(Tool):
                     "logs": logs,
                     "pod": pod_name,
                     "namespace": namespace,
-                    "container": container_name or "默认容器"
+                    "container": container_name or "default container"
                 })
             
             except ApiException as e:
@@ -74,11 +74,11 @@ class GetPodLogsTool(Tool):
                     # Pod或容器不存在
                     error_message = ""
                     if "pods" in str(e) and "not found" in str(e).lower():
-                        error_message = f"未找到Pod: {pod_name} (命名空间: {namespace})"
+                        error_message = f"pod {pod_name} not found (namespace: {namespace})"
                     elif "container" in str(e) and "not found" in str(e).lower():
-                        error_message = f"在Pod {pod_name} 中未找到容器: {container_name} (命名空间: {namespace})"
+                        error_message = f"container {container_name} not found in pod {pod_name} (namespace: {namespace})"
                     else:
-                        error_message = f"资源不存在: {str(e)}"
+                        error_message = f"resource not found: {str(e)}"
                     
                     # 输出text
                     yield self.create_text_message(error_message)
@@ -88,14 +88,14 @@ class GetPodLogsTool(Tool):
                         "logs": "",
                         "pod": pod_name,
                         "namespace": namespace,
-                        "container": container_name or "默认容器",
+                        "container": container_name or "default container",
                         "status": "NotFound",
                         "message": error_message
                     })
                 else:
                     # 其他API错误
-                    raise InvokeServerUnavailableError(f"获取Pod日志失败: {str(e)}")
+                    raise InvokeServerUnavailableError(f"failed to get pod logs: {str(e)}")
             
         except Exception as e:
             traceback.print_exc()
-            raise InvokeServerUnavailableError(f"获取Pod日志失败: {str(e)}") 
+            raise InvokeServerUnavailableError(f"failed to get pod logs: {str(e)}") 
