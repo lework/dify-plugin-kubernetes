@@ -60,7 +60,7 @@ jobs:
         with:
           repository: ${{steps.get_basic_info.outputs.author}}/dify-plugins
           path: dify-plugins
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PLUGIN_TOKEN }}
           fetch-depth: 1
           persist-credentials: true
 
@@ -96,7 +96,7 @@ jobs:
           # How to config the token:
           # 1. Profile -> Settings -> Developer settings -> Personal access tokens -> Generate new token (with repo scope) -> Copy the token
           # 2. Go to the target repository -> Settings -> Secrets and variables -> Actions -> New repository secret -> Add the token as GITHUB_TOKEN
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PLUGIN_TOKEN }}
         run: |
           gh pr create \
             --repo langgenius/dify-plugins \
