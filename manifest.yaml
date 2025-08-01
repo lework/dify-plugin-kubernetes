@@ -3,10 +3,10 @@ type: plugin
 author: lework
 name: kubernetes
 label:
-  en_US: Kubernetes
-  ja_JP: Kubernetes
-  zh_Hans: Kubernetes
-  pt_BR: Kubernetes
+  en_US: kubernetes
+  ja_JP: kubernetes
+  zh_Hans: kubernetes
+  pt_BR: kubernetes
 description:
   en_US: Get Kubernetes cluster resource information
   ja_JP: Kubernetesクラスターのリソース情報を取得
